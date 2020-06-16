@@ -16,10 +16,26 @@ namespace CcuCore
     {
         public async override Task Analyze(string solutionPath)
         {
-            await this.Run(solutionPath);
+            var types = await this.Run(solutionPath);
+
+            if (types != null && types.Count > 0)
+            {
+                var serialized = JsonSerializer.Serialize(
+                    types,
+                    new JsonSerializerOptions { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All), WriteIndented = true, });
+
+                Console.WriteLine(serialized);
+            }
         }
 
-        private async Task Run(string solutionPath)
+        public async Task<List<Dictionary<string, string>>> AnalyzeToDict(string solutionPath)
+        {
+            var types = await this.Run(solutionPath);
+            if (types == null && types.Count == 0) return new List<Dictionary<string, string>>();
+            return types.Select(t => t.ToDictionary()).ToList();
+        }
+
+        private async Task<HashSet<TypeUsageInfo>> Run(string solutionPath)
         {
             using (var workspace = MSBuildWorkspace.Create())
             {
@@ -57,13 +73,7 @@ namespace CcuCore
                     }
                 }
 
-                if (types.Count > 0)
-                {
-                    var serialized = JsonSerializer.Serialize(
-                        types,
-                        new JsonSerializerOptions { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All), WriteIndented = true, });
-                    Console.WriteLine(serialized);
-                }
+                return types;
             }
         }
 
@@ -94,6 +104,17 @@ namespace CcuCore
             public override int GetHashCode()
             {
                 return HashCode.Combine(this.Project, this.Namespace, this.Class, this.Type);
+            }
+
+            public Dictionary<string, string> ToDictionary()
+            {
+                return new Dictionary<string, string>
+                {
+                    { nameof(Project), this.Project },
+                    { nameof(Namespace), this.Namespace },
+                    { nameof(Class), this.Class },
+                    { nameof(Type), this.Type },
+                };
             }
         }
     }
