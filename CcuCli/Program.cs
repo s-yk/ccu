@@ -11,7 +11,7 @@ namespace CcuCli
         {
             try
             {
-                await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt => { await AnalyzerFactory.Create(opt.Hierarchy).Analyze(opt.SolutionPath); });
+                await Parser.Default.ParseArguments<Options>(args).WithParsedAsync(async opt => { await AnalyzerFactory.Create(opt.Hierarchy, opt.Verbose).Analyze(opt.SolutionPath); });
             }
             catch (Exception e)
             {

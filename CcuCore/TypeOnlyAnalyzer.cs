@@ -14,6 +14,8 @@ namespace CcuCore
 {
     public class TypeOnlyAnalyzer : BaseAnalyzer
     {
+        public TypeOnlyAnalyzer(bool verbose) : base(verbose) { }
+
         public async override Task Analyze(string solutionPath)
         {
             var types = await this.Run(solutionPath);
@@ -39,11 +41,11 @@ namespace CcuCore
         {
             using (var workspace = MSBuildWorkspace.Create())
             {
-                workspace.WorkspaceFailed += (o, e) => Console.WriteLine(e.Diagnostic.Message);
-                Console.WriteLine($"Loading solution '{solutionPath}'");
+                workspace.WorkspaceFailed += (o, e) => ConsoleOut(e.Diagnostic.Message);
+                ConsoleOut($"Loading solution '{solutionPath}'");
 
                 var solution = await this.OpenSolutionAsync(workspace, solutionPath);
-                Console.WriteLine($"Finished loading solution '{solutionPath}'");
+                ConsoleOut($"Finished loading solution '{solutionPath}'");
 
                 var types = new HashSet<TypeUsageInfo>();
                 var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);

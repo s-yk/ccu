@@ -2,13 +2,13 @@
 {
     public class AnalyzerFactory
     {
-        public static IAnalyzer Create(bool hierarchy)
+        public static IAnalyzer Create(bool hierarchy, bool verbose)
         {
             if (hierarchy)
             {
-                return new StandardAnalyzer();
+                return new StandardAnalyzer(verbose);
             }
-            return new TypeOnlyAnalyzer();
+            return new TypeOnlyAnalyzer(verbose);
         }
     }
 }

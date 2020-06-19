@@ -11,8 +11,11 @@ namespace CcuCore
     public abstract class BaseAnalyzer : IAnalyzer
     {
 
-        public BaseAnalyzer()
+        private readonly bool _verbose;
+
+        public BaseAnalyzer(bool verbose)
         {
+            this._verbose = verbose;
             this.Prepare();
         }
 
@@ -24,24 +27,25 @@ namespace CcuCore
             var instance = visualStudioInstances.Length == 1
                 ? visualStudioInstances[0]
                 : SelectVisualStudioInstance(visualStudioInstances);
-            Console.WriteLine($"Using MSBuild at '{instance.MSBuildPath}' to load projects.");
+            ConsoleOut($"Using MSBuild at '{instance.MSBuildPath}' to load projects.");
             MSBuildLocator.RegisterInstance(instance);
         }
 
         protected Task<Solution> OpenSolutionAsync(MSBuildWorkspace workspace, string solutionPath)
         {
-            return workspace.OpenSolutionAsync(solutionPath, new ConsoleProgressReporter());
+            var reporter = this._verbose ? new ConsoleProgressReporter() : null;
+            return workspace.OpenSolutionAsync(solutionPath, reporter);
         }
 
         private VisualStudioInstance SelectVisualStudioInstance(VisualStudioInstance[] visualStudioInstances)
         {
-            Console.WriteLine("Multiple installs of MSBuild detected please select one:");
+            ConsoleOut("Multiple installs of MSBuild detected please select one:");
             for (int i = 0; i < visualStudioInstances.Length; i++)
             {
-                Console.WriteLine($"Instance {i + 1}");
-                Console.WriteLine($"    Name: {visualStudioInstances[i].Name}");
-                Console.WriteLine($"    Version: {visualStudioInstances[i].Version}");
-                Console.WriteLine($"    MSBuild Path: {visualStudioInstances[i].MSBuildPath}");
+                ConsoleOut($"Instance {i + 1}");
+                ConsoleOut($"    Name: {visualStudioInstances[i].Name}");
+                ConsoleOut($"    Version: {visualStudioInstances[i].Version}");
+                ConsoleOut($"    MSBuild Path: {visualStudioInstances[i].MSBuildPath}");
             }
 
             while (true)
@@ -51,10 +55,17 @@ namespace CcuCore
                     instanceNumber > 0 &&
                     instanceNumber <= visualStudioInstances.Length)
                 {
+                    if (!_verbose) Console.Clear();
                     return visualStudioInstances[instanceNumber - 1];
                 }
-                Console.WriteLine("Input not accepted, try again.");
+                ConsoleOut("Input not accepted, try again.");
             }
+        }
+
+        protected void ConsoleOut(string content)
+        {
+            if (!this._verbose) return;
+            Console.WriteLine(content);
         }
 
         private class ConsoleProgressReporter : IProgress<ProjectLoadProgress>
