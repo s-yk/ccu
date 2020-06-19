@@ -14,6 +14,8 @@ namespace CcuCore
 {
     public class StandardAnalyzer : BaseAnalyzer
     {
+        public StandardAnalyzer() : base(false) { }
+
         public StandardAnalyzer(bool verbose) : base(verbose) { }
 
         public async override Task Analyze(string solutionPath)

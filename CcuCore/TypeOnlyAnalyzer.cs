@@ -14,6 +14,8 @@ namespace CcuCore
 {
     public class TypeOnlyAnalyzer : BaseAnalyzer
     {
+        public TypeOnlyAnalyzer() : base(false) { }
+
         public TypeOnlyAnalyzer(bool verbose) : base(verbose) { }
 
         public async override Task Analyze(string solutionPath)
